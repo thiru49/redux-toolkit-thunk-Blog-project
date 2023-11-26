@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { addPosts } from "./postsSlice";
-import { selectAllUsers } from "../users/usersSlice";
+import { selectPostById,updatePost,deletePost} from "./postsSlice";
 
-import { useNavigate } from "react-router-dom";
+import { selectAllUsers } from "../users/usersSlice";
+import { useNavigate, useParams } from "react-router-dom";
 
 const AddPostForm = () => {
-    const dispatch = useDispatch();
+    
+     const {postId} = useParams();
+     const navigate = useNavigate();
 
-    const navigate = useNavigate();
-    const [title, setTitle] = useState('')
-    const [content, setContent] = useState('')
-    const [userId, setUserId] = useState('')
+    const post = useSelector((state)=> selectPostById(state,Number(postId)))
+   
+
+    const [title, setTitle] = useState(post?.title)
+    const [content, setContent] = useState(post?.body)
+    const [userId, setUserId] = useState(post?.userId)
     const [reuestStatus,setRequestStatus] = useState('idle')
 
+    const dispatch = useDispatch();
     const users = useSelector(selectAllUsers)
 
     const onTitleChanged = e => setTitle(e.target.value)
@@ -28,12 +33,12 @@ const AddPostForm = () => {
             try{
                 setRequestStatus('pending')
                 dispatch(
-                    addPosts({title,body: content, userId})
+                    updatePost({id:post.id,title,body: content, userId,reactions:post.reactions})
                 ).unwrap()
                 setTitle('')
                 setContent('')
                 setUserId('')
-                navigate('/')
+                navigate(`/post/${postId}`)
             }catch(err){
                 console.error('falied to save the post',err)
             } finally {
@@ -41,6 +46,25 @@ const AddPostForm = () => {
             }
            
         }
+    }
+    const onDeletePostClicked = () => {
+        
+            try{
+                setRequestStatus('pending')
+                dispatch(
+                    deletePost({id:post.id})
+                ).unwrap()
+                setTitle('')
+                setContent('')
+                setUserId('')
+                navigate('/')
+            }catch(err){
+                console.error('falied to delete the post',err)
+            } finally {
+                setRequestStatus('idle')
+            }
+           
+
     }
 
     
@@ -53,7 +77,7 @@ const AddPostForm = () => {
 
     return (
         <section>
-            <h2>Add a New Post</h2>
+            <h2>Edit Post</h2>
             <form>
                 <label htmlFor="postTitle">Post Title:</label>
                 <input
@@ -64,7 +88,7 @@ const AddPostForm = () => {
                     onChange={onTitleChanged}
                 />
                 <label htmlFor="postAuthor">Author:</label>
-                <select id="postAuthor" value={userId} onChange={onAuthorChanged}>
+                <select id="postAuthor" defaultValue={userId} onChange={onAuthorChanged}>
                     <option value=""></option>
                     {usersOptions}
                 </select>
@@ -80,6 +104,11 @@ const AddPostForm = () => {
                     onClick={onSavePostClicked}
                     disabled={!canSave}
                 >Save Post</button>
+                <button
+                    type="button"
+                    onClick={onDeletePostClicked}
+                    
+                >Delete Post</button>
             </form>
         </section>
     )
