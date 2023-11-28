@@ -7,9 +7,11 @@ import { selectAllUsers } from "../users/usersSlice";
 import { useNavigate } from "react-router-dom";
 
 const AddPostForm = () => {
+    
     const dispatch = useDispatch();
-
     const navigate = useNavigate();
+
+
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [userId, setUserId] = useState('')

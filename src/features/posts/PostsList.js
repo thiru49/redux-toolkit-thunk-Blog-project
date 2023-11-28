@@ -7,6 +7,7 @@ const PostsList = () => {
  
 
   const posts = useSelector(selectAllPosts);
+  console.log(posts)
   const postsStatus = useSelector(getPostsStatus);
   const err = useSelector(getPostsError);
 
